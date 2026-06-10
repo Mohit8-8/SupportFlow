@@ -18,7 +18,9 @@ async function request(endpoint: string, options: RequestInit = {}) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `Request failed with status ${response.status}`);
+    throw new Error(
+      errorData.error || `Request failed with status ${response.status}`,
+    );
   }
 
   return response.json();
@@ -27,18 +29,34 @@ async function request(endpoint: string, options: RequestInit = {}) {
 // Named API exports matching our backend controller actions
 export const api = {
   auth: {
-    register: (data: any) => request("/auth/register", { method: "POST", body: JSON.stringify(data) }),
-    login: (data: any) => request("/auth/login", { method: "POST", body: JSON.stringify(data) }),
+    register: (data: any) =>
+      request("/auth/register", { method: "POST", body: JSON.stringify(data) }),
+    login: (data: any) =>
+      request("/auth/login", { method: "POST", body: JSON.stringify(data) }),
   },
   tickets: {
-    create: (data: { title: string; description: string }) => 
+    create: (data: { title: string; description: string }) =>
       request("/tickets", { method: "POST", body: JSON.stringify(data) }),
-    getAll: () => request("/tickets", { method: "GET" }),
-    update: (id: string, data: any) => 
-      request(`/tickets/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+
+    // Update getAll to handle search/pagination parameters
+    getAll: (params?: Record<string, string | number>) => {
+      const queryString = params
+        ? "?" + new URLSearchParams(params as any).toString()
+        : "";
+      return request(`/tickets${queryString}`, { method: "GET" });
+    },
+
+    update: (id: string, data: any) =>
+      request(`/tickets/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }),
   },
   comments: {
-    add: (ticketId: string, content: string) => 
-      request(`/tickets/${ticketId}/comments`, { method: "POST", body: JSON.stringify({ content }) }),
+    add: (ticketId: string, content: string) =>
+      request(`/tickets/${ticketId}/comments`, {
+        method: "POST",
+        body: JSON.stringify({ content }),
+      }),
   },
 };

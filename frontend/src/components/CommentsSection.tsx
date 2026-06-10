@@ -10,7 +10,11 @@ interface CommentsSectionProps {
   onCommentAdded: () => void;
 }
 
-export function CommentsSection({ ticketId, initialComments, onCommentAdded }: CommentsSectionProps) {
+export function CommentsSection({
+  ticketId,
+  initialComments,
+  onCommentAdded,
+}: CommentsSectionProps) {
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -22,9 +26,11 @@ export function CommentsSection({ ticketId, initialComments, onCommentAdded }: C
     try {
       await api.comments.add(ticketId, content);
       setContent("");
-      onCommentAdded(); // Refresh data panel parent
-    } catch (err) {
-      alert("Message delivery failed.");
+      onCommentAdded();
+    } catch (err: any) {
+      // FIX: Force the browser to show us the actual internal JavaScript error!
+      console.error("Local Crash:", err);
+      alert(`System Error: ${err.message || String(err)}`);
     } finally {
       setSubmitting(false);
     }
@@ -32,21 +38,25 @@ export function CommentsSection({ ticketId, initialComments, onCommentAdded }: C
 
   return (
     <div className="space-y-4 pt-4 border-t border-neutral-100 dark:border-neutral-800">
-      <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Conversation Thread</h4>
-      
+      <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
+        Conversation Thread
+      </h4>
+
       {/* Messages Timeline */}
       <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
         {initialComments.length === 0 ? (
-          <p className="text-xs italic text-neutral-400">No messages in this thread yet.</p>
+          <p className="text-xs italic text-neutral-400">
+            No messages in this thread yet.
+          </p>
         ) : (
           initialComments.map((comment: any) => {
             const isAgent = comment.author?.role === "AGENT";
             return (
-              <div 
-                key={comment.id} 
+              <div
+                key={comment.id}
                 className={`p-3 rounded-lg text-sm max-w-[85%] ${
-                  isAgent 
-                    ? "bg-blue-50 text-blue-950 border border-blue-100 ml-auto dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/50" 
+                  isAgent
+                    ? "bg-blue-50 text-blue-950 border border-blue-100 ml-auto dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/50"
                     : "bg-neutral-50 text-neutral-800 border border-neutral-100 dark:bg-neutral-800/40 dark:text-neutral-300 dark:border-neutral-700/50"
                 }`}
               >
@@ -56,7 +66,9 @@ export function CommentsSection({ ticketId, initialComments, onCommentAdded }: C
                     {comment.author?.role}
                   </span>
                 </div>
-                <p className="whitespace-pre-wrap leading-relaxed">{comment.content}</p>
+                <p className="whitespace-pre-wrap leading-relaxed">
+                  {comment.content}
+                </p>
               </div>
             );
           })
@@ -73,7 +85,11 @@ export function CommentsSection({ ticketId, initialComments, onCommentAdded }: C
           className="flex-1"
         />
         <Button type="submit" size="icon" disabled={submitting}>
-          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          {submitting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
         </Button>
       </form>
     </div>

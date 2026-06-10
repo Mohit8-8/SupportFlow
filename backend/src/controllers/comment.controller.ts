@@ -18,10 +18,15 @@ export const addComment = async (req: AuthenticatedRequest, res: Response): Prom
       return;
     }
 
+    // Diagnostic log to see exactly what parameters are arriving
+    console.log("--- ATTEMPTING COMMENT CREATION ---");
+    console.log("Params Ticket ID:", ticketId);
+    console.log("Authenticated User ID:", userId);
+
     const newComment = await prisma.comment.create({
       data: {
         content,
-        ticketId: ticketId as string, // FIX: Explicitly cast parameter to string
+        ticketId: ticketId as string,
         authorId: userId,
       },
       include: {
@@ -31,6 +36,12 @@ export const addComment = async (req: AuthenticatedRequest, res: Response): Prom
 
     res.status(201).json({ message: "Comment added successfully!", comment: newComment });
   } catch (error) {
-    res.status(500).json({ error: "Failed to drop comment into thread." });
+    // CRITICAL: Print the raw database/Prisma exception details to the terminal window
+    console.error("❌ RAW PRISMA COMMENT CRASH LOG:", error);
+    
+    res.status(500).json({ 
+      error: "Failed to drop comment into thread.",
+      details: error instanceof Error ? error.message : String(error)
+    });
   }
 };

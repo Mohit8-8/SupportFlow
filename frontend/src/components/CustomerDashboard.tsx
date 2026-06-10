@@ -20,8 +20,8 @@ export function CustomerDashboard() {
   // Fetch only this customer's tickets on load
   const loadTickets = async () => {
     try {
-      const data = await api.tickets.getAll();
-      setTickets(data);
+      const response = await api.tickets.getAll();
+      setTickets(response.data); // FIX: Add .data here to unwrap the array
     } catch (err) {
       console.error("Failed to load tickets", err);
     } finally {
