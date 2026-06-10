@@ -44,16 +44,26 @@ export const getTickets = async (req: AuthenticatedRequest, res: Response): Prom
     const role = req.user?.role;
 
     let tickets;
-
-    // Senior Dev Design: If agent, fetch everything. If customer, only fetch theirs.
     if (role === "AGENT") {
       tickets = await prisma.ticket.findMany({
-        include: { createdBy: { select: { email: true } } },
+        include: { 
+          createdBy: { select: { email: true } },
+          comments: { 
+            include: { author: { select: { email: true, role: true } } },
+            orderBy: { createdAt: "asc" } // Oldest messages first (standard chat layout)
+          }
+        },
         orderBy: { createdAt: "desc" },
       });
     } else {
       tickets = await prisma.ticket.findMany({
         where: { createdById: userId },
+        include: {
+          comments: {
+            include: { author: { select: { email: true, role: true } } },
+            orderBy: { createdAt: "asc" }
+          }
+        },
         orderBy: { createdAt: "desc" },
       });
     }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { CommentsSection } from "./CommentsSection";
 import { api } from "../lib/api";
 import { Button } from "./ui/button";
 import { Loader2, ShieldAlert, Check, RefreshCw } from "lucide-react";
@@ -13,10 +14,14 @@ export function AgentDashboard() {
     try {
       const data = await api.tickets.getAll();
       setTickets(data);
-      if (selectedTicket) {
-        const freshSelected = data.find((t: any) => t.id === selectedTicket.id);
-        if (freshSelected) setSelectedTicket(freshSelected);
-      }
+      
+      // FIX: Use functional state update to guarantee we get the latest selected ticket
+      setSelectedTicket((currentSelected: any | null) => {
+        if (currentSelected) {
+          return data.find((t: any) => t.id === currentSelected.id) || currentSelected;
+        }
+        return null;
+      });
     } catch (err) {
       console.error(err);
     } finally {
@@ -105,6 +110,12 @@ export function AgentDashboard() {
               <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2">User Description</h4>
               <p className="text-sm text-neutral-700 bg-neutral-50 dark:bg-neutral-950 p-4 rounded-lg border dark:text-neutral-300 whitespace-pre-wrap">{selectedTicket.description}</p>
             </div>
+
+            <CommentsSection 
+              ticketId={selectedTicket.id} 
+              initialComments={selectedTicket.comments || []} 
+              onCommentAdded={() => {}} 
+            />
 
             {/* AI AUTO-TRIAGE GENERATIONS BLOCK */}
             <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-5 dark:border-blue-900/30 dark:bg-blue-950/20 space-y-4">

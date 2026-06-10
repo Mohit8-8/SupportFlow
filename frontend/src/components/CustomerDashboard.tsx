@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { CommentsSection } from "./CommentsSection";
 import { api } from "../lib/api";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -10,6 +11,11 @@ export function CustomerDashboard() {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [openTickets, setOpenTickets] = useState<Record<string, boolean>>({});
+
+  const toggleTicket = (id: string) => {
+    setOpenTickets((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   // Fetch only this customer's tickets on load
   const loadTickets = async () => {
@@ -104,28 +110,49 @@ export function CustomerDashboard() {
           <div className="text-center rounded-xl border border-dashed p-12 text-neutral-400">You haven't opened any support requests yet.</div>
         ) : (
           <div className="space-y-3">
-            {tickets.map((ticket) => (
-              <div key={ticket.id} className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="text-xs font-mono bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded dark:bg-neutral-800 dark:text-neutral-400">
-                      {ticket.category || "General"}
-                    </span>
-                    <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-50 mt-1">{ticket.title}</h3>
+            {/* CORRECTED TICKET MAPPER */}
+            {tickets.map((ticket) => {
+              const isOpen = !!openTickets[ticket.id]; // Check if this specific ticket is open
+              return (
+                <div key={ticket.id} className="space-y-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+                  <div className="flex cursor-pointer items-start justify-between" onClick={() => toggleTicket(ticket.id)}>
+                    <div>
+                      <span className="rounded bg-neutral-100 px-2 py-0.5 font-mono text-xs text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+                        {ticket.category || "General"}
+                      </span>
+                      <h3 className="mt-1 text-base font-semibold text-neutral-900 hover:underline dark:text-neutral-50">{ticket.title}</h3>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${getPriorityColor(ticket.priority)}`}>
+                        {ticket.priority}
+                      </span>
+                      <span className="text-xs text-neutral-400">
+                        {ticket.status}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1.5">
-                    <span className={`text-xs px-2.5 py-0.5 font-semibold rounded-full ${getPriorityColor(ticket.priority)}`}>
-                      {ticket.priority}
-                    </span>
-                    <span className="text-xs text-neutral-400 flex items-center gap-1">
-                      {ticket.status === "OPEN" ? <Clock className="h-3 w-3" /> : <CheckCircle className="h-3 w-3" />}
-                      {ticket.status}
-                    </span>
+                  <p className="whitespace-pre-wrap text-sm text-neutral-600 dark:text-neutral-400">{ticket.description}</p>
+                  
+                  {/* Expandable Chat Workspace Toggle Button */}
+                  <div className="pt-2">
+                    <button 
+                      onClick={() => toggleTicket(ticket.id)} 
+                      className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+                    >
+                      {isOpen ? "▲ Hide Messages" : `▼ View Conversation Thread (${ticket.comments?.length || 0})`}
+                    </button>
                   </div>
+
+                  {isOpen && (
+                    <CommentsSection 
+                      ticketId={ticket.id}
+                      initialComments={ticket.comments || []}
+                      onCommentAdded={loadTickets}
+                    />
+                  )}
                 </div>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 line-clamp-2">{ticket.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
