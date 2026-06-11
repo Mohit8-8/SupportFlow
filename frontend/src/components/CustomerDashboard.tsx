@@ -3,7 +3,7 @@ import { CommentsSection } from "./CommentsSection";
 import { api } from "../lib/api";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { PlusCircle, Loader2, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { PlusCircle, Loader2} from "lucide-react";
 
 export function CustomerDashboard() {
   const [tickets, setTickets] = useState<any[]>([]);

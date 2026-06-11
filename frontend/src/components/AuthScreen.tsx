@@ -35,7 +35,7 @@ export function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
         onAuthSuccess(response.user);
       } else {
         // Trigger Registration Endpoint
-        const response = await api.auth.register({ email, password, role });
+        await api.auth.register({ email, password, role });
         // Auto-login the user immediately after successful registration
         const loginResponse = await api.auth.login({ email, password });
         localStorage.setItem("token", loginResponse.token);

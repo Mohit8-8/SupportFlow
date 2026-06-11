@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { AuthScreen } from "@/components/AuthScreen";
 import { CustomerDashboard } from "@/components/CustomerDashboard"; // 1. Import Customer Panel
 import { AgentDashboard } from "@/components/AgentDashboard";       // 2. Import Agent Panel
