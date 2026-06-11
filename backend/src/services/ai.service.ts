@@ -78,8 +78,8 @@ export const analyzeTicketWithAI = async (
     console.error("❌ AI Triage Error, falling back to defaults:", error);
     return {
       category: "Technical Issue",
-      priority: "HIGH", // Play it safe on failure by bumping priority to human review
-      suggestedResponse: "We are experiencing technical difficulties generating an automated draft, but an agent has been notified.",
+      priority: "MEDIUM", // Play it safe on failure by bumping priority to human review
+      suggestedResponse: "Thank you for reaching out. A support agent will review your request shortly."
     };
   }
 };
